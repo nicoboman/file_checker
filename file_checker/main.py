@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-print("Start of code...")
-print("Test git commit...")
-
 from pathlib import Path
 from utils.dataFrameCreator import *
 from utils.common import *
