@@ -4,7 +4,7 @@ from utils.common import *
 from error.datdutErrors import *
 from checks.checkDATDUT import *
 
-class CheckPatterns(CheckDATDUT):
+class CheckPatterns():
     "check patterns from DAT DUT file"
     
     def __init__(self, data_frame, fu_type):

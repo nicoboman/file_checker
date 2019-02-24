@@ -1,2 +1,5 @@
 eclipse.preferences.version=1
+encoding//checks/checkPatterns.py=utf-8
+encoding//checks/checkSinusPatterns.py=utf-8
+encoding//error/datdutErrors.py=utf-8
 encoding/main.py=utf-8

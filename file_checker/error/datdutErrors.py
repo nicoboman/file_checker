@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+class InitialChecksError(Exception):
+    "error in the initial checks"
+    pass
+
 class FilePrefixError(Exception):
     "error in prefix of csv file"    
     pass

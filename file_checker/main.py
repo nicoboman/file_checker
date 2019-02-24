@@ -9,7 +9,7 @@ from utils.common import *
 # from checks.checkTrapezoidPatterns import *
 # from checks.checkBangBangPatterns import *
 # from checks.checkBlocs import *
-# from error.datdutErrors import *
+from error.datdutErrors import *
 
 p_datdut_dir = Path(C_DAT_DUT_DIR)
 
@@ -17,18 +17,33 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
     displayFileName(dat_dut_file.name)
     
     with open (C_DAT_DUT_DIR + dat_dut_file.name,'r',encoding='utf8') as file_handler:
+        # read of first line:
         line = file_handler.readline()
+        line_number = 1 
         
         while line:
             line = file_handler.readline()
-            # ne rien faire pour les lignes de commentaires ou les lignes vides
-            if line.startswith('#') or len(line.strip()) == 0:
+            line_number = line_number + 1
+            # do nothing for commentary or blank lines:
+            if line.startswith(C_COMMENT) or len(line.strip()) == 0:
                 continue
             else:
-                liste = line.split(',')
-                # suppression du dernier caractère (saut de ligne)
+                liste = line.split(C_SEPARATOR)
+                # delete last character (jump to next line character)
                 del(liste[-1])
-                print(liste, len(liste))
+                
+                # Checks on the structure of line
+                try:
+                    # elementary checks on the structure of line, definition and type
+                    if len(liste) != C_NB_OF_FIELD:
+                        raise InitialChecksError("[Initial Checks Error]: invalid number of fields in line: ", line_number)
+                    elif liste[C_DEFINITION_COLUMN] not in ['pattern', 'bloc']:
+                        raise InitialChecksError("[Initial Checks Error]: invalid definition in line: ", line_number)
+                    elif liste[C_TYPE_COLUMN] not in ['sinus', 'square', 'trapezoid', 'bangbang']:
+                        raise InitialChecksError("[Initial Checks Error]: invalid type in line: ", line_number)
+                except (InitialChecksError) as e:
+                    print(e.args[0], e.args[1], '=> no additionnal check for this line')
+
 
         
 
