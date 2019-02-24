@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+print("Start of program...")
+# test commit sur master
+
 from pathlib import Path
 from utils.dataFrameCreator import *
 from utils.common import *
