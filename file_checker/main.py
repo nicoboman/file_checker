@@ -2,8 +2,9 @@
 
 from pathlib import Path
 from utils.common import *
+from checks.checkInit import *
 # from checks.checkDATDUT import *
-from checks.checkPatterns import *
+# from checks.checkPatterns import *
 # from checks.checkSinusPatterns import *
 # from checks.checkSquarePatterns import *
 # from checks.checkTrapezoidPatterns import *
@@ -36,17 +37,10 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
 
                 # Checks on the structure of line
                 try:
-                    # elementary checks on the structure of line, definition and type
-                    if len(liste) != C_NB_OF_FIELD:
-                        raise InitialChecksError("[Initial Checks Error]: invalid number of fields in line: ", line_number)
-                    elif liste[C_DEFINITION_COLUMN] not in ['pattern', 'bloc', 'fdir']:
-                        raise InitialChecksError("[Initial Checks Error]: invalid definition in line: ", line_number)
-                    elif liste[C_TYPE_COLUMN] not in ['sinus', 'square', 'trapezoid', 'bangbang', 'corridor', 'behaviour']:
-                        raise InitialChecksError("[Initial Checks Error]: invalid type in line: ", line_number)
-                    # check if id is an integer and is >= 0:
-                    elif not liste[C_ID_COLUMN].isdigit():
-                        raise InitialChecksError("[Initial Checks Error]: ID is not a positive integer in line: ", line_number)
-
+                    # Object instanciation
+                    init_checker = CheckInit(liste, line_number)
+                    # First checks
+                    init_checker.checkInit()
                 except (InitialChecksError) as e:
                     print(e.args[0], e.args[1], '=> no additionnal check for this line')
 
