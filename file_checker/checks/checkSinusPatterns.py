@@ -2,19 +2,18 @@
 import pandas as pd
 import numpy as np
 from utils.common import *
-from checks.checkDATDUT import *
-from checks.checkPatterns import *
 from builtins import range
 from error.datdutErrors import *
 
-class CheckSinusPatterns(CheckPatterns):
-    "check sinus patterns from DAT DUT file"
+class CheckSinusPatterns:
+    "check sinus patterns of dut file"
     
-    def __init__(self, data_frame, fu_type):
-        CheckPatterns.__init__(self, data_frame, fu_type)
-        
-        # Select sinus pattern rows
-        self.df_sinus_pattern_rows = self.df_pattern_rows[self.df_pattern_rows.type == "sinus"]
+    def __init__(self, liste, line_number):
+        self.liste = liste
+        self.line_number = line_number
+        self.error_flag = False
+        self.error_list = []
+        self.error_string = ''
         
         # Threshold file
         if self.fu_type == 'SR':
@@ -42,62 +41,41 @@ class CheckSinusPatterns(CheckPatterns):
         self.nb_repet_max = (self.df_threshold[self.df_threshold.parameter == 'nb_repet']).iloc[0,2]
 
     def checkSinusPatternIDsUnique(self):
-        self.temp_df = self.df_sinus_pattern_rows.loc[:,'id']
-        
-        if not self.temp_df.is_unique:
-            self.temp_df = self.df_sinus_pattern_rows.loc[:, 'line':'id':C_ID_COLUMN]
-            raise SinusPatternsError("[Sinus Pattern Error]: Sinus patterns id's are not unique, in line(s) below: \n", self.temp_df.values)
+#         TODO
 
     def checkAmplitude(self):
-        # get lines where:
-        #   - ampl_or_stepinc_or_finalpos1 column is out of range
-        # then return line and ampl_or_stepinc_or_finalpos1 columns for those lines
-        self.temp_df_low = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'ampl_or_stepinc_or_finalpos1'] < self.ampl_min,'line':'ampl_or_stepinc_or_finalpos1':C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]
-        self.temp_df_high = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'ampl_or_stepinc_or_finalpos1'] > self.ampl_max,'line':'ampl_or_stepinc_or_finalpos1':C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: ampl_or_stepinc_or_finalpos1(s) < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: ampl_or_stepinc_or_finalpos1(s) > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]) < self.ampl_min:
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' amplitude < min')
+        elif float(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]) > self.ampl_max:
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' amplitude > max')
 
     def checkNbOfPoints(self):
-        # get lines where:
-        #   - nb_item_or_first_patt_num column <= 0
-        # then return line and nb_item_or_first_patt_num columns for those lines
-        self.temp_df_low = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'nb_item_or_first_patt_num'] < self.nb_point_min,'line':'nb_item_or_first_patt_num':C_NB_ITEM_OR_FIRST_PATT_NUM]
-        self.temp_df_high = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'nb_item_or_first_patt_num'] > self.nb_point_max,'line':'nb_item_or_first_patt_num':C_NB_ITEM_OR_FIRST_PATT_NUM]
-
-        if not self.temp_df_low.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: nb_item_or_first_patt_num(s) < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: nb_item_or_first_patt_num(s) > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]) < self.nb_point_min:
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' number of points < min')
+        elif float(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]) > self.nb_point_max:
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' number of points > max')
     
     def checkNbOfPointsisInteger(self):
-        # nb_points must always be an integer        
-        for i in range(self.df_sinus_pattern_rows.shape[0]):
-            if not isInteger(self.df_sinus_pattern_rows.iloc[i,C_NB_ITEM_OR_FIRST_PATT_NUM]):
-                raise SinusPatternsError("[Sinus Pattern Error]: nb of points is not an integer in line: ", self.df_sinus_pattern_rows.iloc[i,C_LINE_COLUMN])
+        if not self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM].isdigit():
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' number of points is not a positive integer')
 
     def checkNbOfRepet(self):
-        # get lines where:
-        #   - nb_repet_or_last_patt_num column <= 0
-        # then return line and nb_repet_or_last_patt_num columns for those lines
-        self.temp_df_low = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'nb_repet_or_last_patt_num'] < self.nb_repet_min,'line':'nb_repet_or_last_patt_num':C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]
-        self.temp_df_high = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'nb_repet_or_last_patt_num'] > self.nb_repet_max,'line':'nb_repet_or_last_patt_num':C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: nb_repet_or_last_patt_num(s) < min in line(s) below: \n", self.temp_df_low.values)
+        if float(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]) < self.nb_repet_min:
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' number of points < min')
+        elif float(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]) > self.nb_repet_max:
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' number of points > max')
             
-        if not self.temp_df_high.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: nb_repet_or_last_patt_num(s) > max in line(s) below: \n", self.temp_df_high.values)
-    
     def checkNbOfRepetisInteger(self):
-        # nb_repet must always be an integer        
-        for i in range(self.df_sinus_pattern_rows.shape[0]):
-            if not isInteger(self.df_sinus_pattern_rows.iloc[i,C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]):
-                raise SinusPatternsError("[Sinus Pattern Error]: nb of repet is not an integer in line: ", self.df_sinus_pattern_rows.iloc[i,C_LINE_COLUMN])
+        if not self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN].isdigit():
+            self.error_flag = True
+            self.error_list.append('line ' + str(self.line_number) + ' number of repet is not a positive integer')
     
     def checkMandatoryOrPointlessParameters(self):
         # check mandatory parameters are mentioned

@@ -42,7 +42,15 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                     # First checks
                     init_checker.checkInit()
                 except (InitialChecksError) as e:
-                    print(e.args[0], e.args[1], '=> no additionnal check for this line')
+                    print(e.args[0] + 'line ' + str(e.args[1]) + ' => no additionnal check for this line\n')
+                    continue
+                else:
+                    fu_type = getFUType(dat_dut_file.name)
+                    
+                    if init_checker.getTypePattern() == 'SINUS':
+                        sinus_pattern_checker = CheckSinusPatterns(liste, line_number, fu_type)
+                        
+
 
         
 
