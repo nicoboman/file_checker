@@ -46,18 +46,22 @@ class CheckSinusPatterns:
 
     def checkThisSinusPattern(self):
         self.checkMandatoryOrPointlessParameters()
-        
+        self.checkNbOfPointsisInteger()
+        self.checkNbOfRepetisInteger()
+        self.checkIsNumber()
+
         # if an error occured during check of manadatory parameters
         # do not proceed the other checks (no point doing it because maybe parameter is not defined):
-        if not len(self.error_list):
+        if len(self.error_list):
+            self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
+        else:
 #             self.checkSinusPatternIDsUnique()
             self.checkAmplitude()
             self.checkNbOfPoints()
-            self.checkNbOfPointsisInteger()
             self.checkNbOfRepet()
-            self.checkNbOfRepetisInteger()
-#             self.checkSinusDelay()
-#             self.checkOffset()
+            self.checkDelay()
+            self.checkOffset()
+            self.check600HzCommand()
 
         # raises an error if necessary:
         if len(self.error_list):
@@ -72,11 +76,49 @@ class CheckSinusPatterns:
 #     def checkSinusPatternIDsUnique(self):
 # #         TODO
 
+    def checkMandatoryOrPointlessParameters(self):
+        # check mandatory parameters are mentioned
+        # check pointless parameters for sinus patterns are missing
+        # mask to match with
+        sinus_pattern_mask = np.array([True, True, True, True, False, True, True, True, True, True, False, False, False])
+        
+        # structure of the processed line
+        sinus_parameter_presence = np.array(list(map(lambda x: True if len(x) > 0 else False, self.liste)), dtype = bool)
+        
+        # compare the two of them
+        if not np.array_equal(sinus_pattern_mask, sinus_parameter_presence):
+            self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter')
+            
+    def checkConsistency(self):
+        # check if a float number is written when the expected parameter is a float number
+        sinus_pattern_mask = np.array([True, True, True, True, False, True, True, True, True, True, False, False, False])
+        
+        # structure of the processed line
+        sinus_parameter_presence = np.array(list(map(lambda x: True if len(x) > 0 else False, self.liste)), dtype = bool)
+        
+        # compare the two of them
+        if not np.array_equal(sinus_pattern_mask, sinus_parameter_presence):
+            self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter => no additionnal check for this line')
+            
+    def checkIsNumber(self):
+        if not isNumber(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' delay is not a number')
+            
+        if not isNumber(self.liste[C_OFFSET_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' offset is not a number')
+
+        if not isNumber(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' amplitude is not a number')
+
     def checkAmplitude(self):
         if float(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]) < self.ampl_min:
             self.error_list.append('line ' + str(self.line_number) + ' amplitude < min')
         elif float(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]) > self.ampl_max:
             self.error_list.append('line ' + str(self.line_number) + ' amplitude > max')
+            
+    def check600HzCommand(self):
+        if self.liste[C_IS_600HZ_CMD_COLUMN] != 'TRUE' and self.liste[C_IS_600HZ_CMD_COLUMN] != 'FALSE':
+            self.error_list.append('line ' + str(self.line_number) + ' invalid 600Hz parameter: must be TRUE/FALSE')
 
     def checkNbOfPoints(self):
         if float(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]) < self.nb_point_min:
@@ -97,48 +139,21 @@ class CheckSinusPatterns:
     def checkNbOfRepetisInteger(self):
         if not self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN].isdigit():
             self.error_list.append('line ' + str(self.line_number) + ' number of repet is not a positive integer')
-    
-    def checkMandatoryOrPointlessParameters(self):
-        # check mandatory parameters are mentioned
-        # check pointless parameters for sinus patterns are missing
-        # mask to match with
-        sinus_pattern_mask = np.array([True, True, True, True, False, True, True, True, True, True, False, False, False])
-        
-        # structure of the processed line
-        sinus_parameter_presence = np.array(list(map(lambda x: True if len(x) > 0 else False, self.liste)), dtype = bool)
-        
-        # compare the two of them
-        if not np.array_equal(sinus_pattern_mask, sinus_parameter_presence):
-            self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter => no additionnal check for this line')
-                   
-    def checkSinusDelay(self):
-        # get lines where:
-        #   - delay_or_step_duration is out of range
-        # then return line and delay_or_step_duration columns for those lines
-        self.temp_df_low = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'delay_or_step_duration'] < self.delay_min,'line':'delay_or_step_duration':C_DELAY_OR_STEP_DURATION_COLUMN]
-        self.temp_df_high = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'delay_or_step_duration'] > self.delay_max,'line':'delay_or_step_duration':C_DELAY_OR_STEP_DURATION_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: delay_or_step_duration(s) < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: delay_or_step_duration(s) > max in line(s) below: \n", self.temp_df_high.values)
+                       
+    def checkDelay(self):
+        if float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) < self.delay_min:
+            self.error_list.append('line ' + str(self.line_number) + ' delay < min')
+        elif float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) > self.delay_max:
+            self.error_list.append('line ' + str(self.line_number) + ' delay > max')
             
     def checkOffset(self):
-        # get lines where:
-        #   - offset is out of range
-        # then return line and offset columns for those lines
-        self.temp_df_low = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'offset'] < self.offset_min,'line':'offset':C_OFFSET_COLUMN]
-        self.temp_df_high = self.df_sinus_pattern_rows.loc[self.df_sinus_pattern_rows.loc[:, 'offset'] > self.offset_max,'line':'offset':C_OFFSET_COLUMN]
+        if float(self.liste[C_OFFSET_COLUMN]) < self.offset_min:
+            self.error_list.append('line ' + str(self.line_number) + ' offset < min')
+        elif float(self.liste[C_OFFSET_COLUMN]) > self.offset_max:
+            self.error_list.append('line ' + str(self.line_number) + ' offset > max')
 
-        if not self.temp_df_low.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: offset(s) < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise SinusPatternsError("[Sinus Pattern Error]: offset(s) > max in line(s) below: \n", self.temp_df_high.values)
-            
     def setSinusPatternThreshold(self):
         with open (self.threshold_file,'r',encoding='utf8') as self.threshold_file_handler:                
             # Creation of df_threshold data frame:
             self.df_threshold = pd.read_csv(self.threshold_file, sep=C_SEPARATOR, comment=C_COMMENT, header = 0, skip_blank_lines=True)
-                           
+                       

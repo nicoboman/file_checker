@@ -34,10 +34,10 @@ C_LINE_COLUMN=0
 C_DEFINITION_COLUMN=0
 C_TYPE_COLUMN=1
 C_ID_COLUMN=2
-C_DELAY_OR_STEP_DURATION_COLUMN=4
+C_DELAY_OR_STEP_DURATION_COLUMN=3
 C_AXIS_COLUMN=5
-C_OFFSET_COLUMN=6
-C_IS_600HZ_CMD_COLUMN=7
+C_OFFSET_COLUMN=5
+C_IS_600HZ_CMD_COLUMN=6
 C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN=7
 C_FINAL_POS2_COLUMN=9
 C_NB_ITEM_OR_FIRST_PATT_NUM = 8
@@ -55,6 +55,13 @@ def isInteger(number):
         b_is_integer = True
     
     return b_is_integer
+
+def isNumber(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 def displayFileName(file_name):
     print('\n' + "-" * len(file_name))
