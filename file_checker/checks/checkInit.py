@@ -5,11 +5,16 @@ from error.datdutErrors import *
 class CheckInit:
     "process init checks of dut file"
     
-    def __init__(self, liste, line_number):
+    def __init__(self, liste, line_number, fu_type):
         self.liste = liste
         self.line_number = line_number
+        self.fu_type = fu_type
         self.error_list = []
         self.error_string = ''
+#         self.sinus_pattern_ids = []
+#         self.square_pattern_ids = []
+#         self.trapezoid_pattern_ids = []
+#         self.bangbang_pattern_ids = []
         
     def checkInit(self):
         # elementary checks on the structure of line, definition and type
@@ -41,3 +46,22 @@ class CheckInit:
     
     def getDefinition(self):
         return self.liste[C_DEFINITION_COLUMN]
+    
+    def getListe(self):
+        return self.liste
+
+    def getLineNumber(self):
+        return self.line_number
+    
+    def getFUType(self):
+        return self.fu_type
+    
+#     def addPatternID(self, type, id):
+#         if type == 'SINUS':
+#             self.sinus_pattern_ids.append(id)
+#         elif type == 'SQUARE':
+#             self.square_pattern_ids.append(id)
+#         elif type == 'TRAPEZOID':
+#             self.trapezoid_pattern_ids.append(id)
+#         elif type == 'BANGBANG':
+#             self.bangbang_pattern_ids.append(id)

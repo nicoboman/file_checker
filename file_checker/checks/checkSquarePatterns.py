@@ -2,12 +2,11 @@
 import pandas as pd
 import numpy as np
 from utils.common import *
-from checks.checkDATDUT import *
 from checks.checkPatterns import *
 from error.datdutErrors import *
 
-class CheckSquarePatterns(CheckPatterns):
-    "check square patterns from DAT DUT file"
+class CheckSquarePatterns():
+    "check square patterns of dut file"
     
     def __init__(self, data_frame, fu_type):
         CheckPatterns.__init__(self, data_frame, fu_type)

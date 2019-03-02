@@ -2,30 +2,27 @@
 import pandas as pd
 import numpy as np
 from utils.common import *
-from builtins import range
 from error.datdutErrors import *
 from numpy import dtype
 
 class CheckSinusPatterns:
     "check sinus patterns of dut file"
     
-    def __init__(self, liste, line_number, fu_type):
-        self.liste = liste
-        self.line_number = line_number
-        self.fu_type = fu_type
+    def __init__(self, obj_init):
+        self.liste = obj_init.getListe()
+        self.line_number = obj_init.getLineNumber()
+        self.fu_type = obj_init.getFUType()
+#         self.obj_reference = obj_init
         self.error_list = []
         self.error_string = ''
-        self.keys = {}
         
         # Threshold file
-        if fu_type == 'SR':
+        if self.fu_type == 'SR':
             self.threshold_file = C_THRESHOLD_DIR + C_SR_SINUS_THRESHOLD_FILE
-        elif fu_type == 'LL':
+        elif self.fu_type == 'LL':
             self.threshold_file = C_THRESHOLD_DIR + C_LL_SINUS_THRESHOLD_FILE
-        elif fu_type == 'UL':
+        elif self.fu_type == 'UL':
             self.threshold_file = C_THRESHOLD_DIR + C_UL_SINUS_THRESHOLD_FILE
-        else:
-            raise SinusPatternsError("[Sinus Pattern Error]: Unknown FU type: ", self.fu_type)
             
         # set df_threshold
         self.setSinusPatternThreshold()
@@ -44,7 +41,7 @@ class CheckSinusPatterns:
         
         print(self.liste)
 
-    def checkThisSinusPattern(self):
+    def checkSinusPattern(self):
         self.checkMandatoryOrPointlessParameters()
         self.checkNbOfPointsisInteger()
         self.checkNbOfRepetisInteger()
@@ -74,7 +71,11 @@ class CheckSinusPatterns:
             raise SinusPatternsError(self.error_string)
 
 #     def checkSinusPatternIDsUnique(self):
-# #         TODO
+#         TODO
+#         if not self.liste[C_ID_COLUMN] in self.obj_reference.sinus_pattern_ids:
+#             self.obj_reference.addPatternID('SINUS', self.liste[C_ID_COLUMN])
+#         else:
+#             self.error_list.append('line ' + str(self.line_number) + ' ID\'s are not unique')
 
     def checkMandatoryOrPointlessParameters(self):
         # check mandatory parameters are mentioned

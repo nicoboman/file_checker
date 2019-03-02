@@ -20,8 +20,7 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
     with open (C_DAT_DUT_DIR + dat_dut_file.name,'r',encoding='utf8') as file_handler:
         line_number = 0
         
-        fu_type = getFUType(dat_dut_file.name)
-        
+        # read and check each line of the file
         while True:
             line = file_handler.readline()
             line_number = line_number + 1
@@ -40,20 +39,34 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                 # Checks on the structure of line
                 try:
                     # Object instanciation
-                    init_checker = CheckInit(liste, line_number)
+                    init_checker = CheckInit(liste, line_number, getFUType(dat_dut_file.name))
                     # First checks
                     init_checker.checkInit()
+                except FilePrefixError:
+                    print('Unable to set the FU type => no additional check for this file\n')
+                    break
                 except InitialChecksError as e:
-                    print(e.args[0] + 'line ' + str(e.args[1]) + ' => no additionnal check for this line\n')
+                    print(e.args[0] + 'line ' + str(e.args[1]) + ' => no additional check for this line\n')
                     continue
                 else:
-                    # Check sinus patterns
-                    if init_checker.getDefinition() == 'PATTERN' and init_checker.getType() == 'SINUS':
-                        try:
-                            sinus_pattern_checker = CheckSinusPatterns(liste, line_number, fu_type)
-                            sinus_pattern_checker.checkThisSinusPattern()
-                        except SinusPatternsError as e:
-                            print(e.args[0])
+                    # Check patterns
+                    if init_checker.getDefinition() == 'PATTERN':
+                        # Check sinus pattern
+                        if init_checker.getType() == 'SINUS':
+                            try:
+                                sinus_pattern_checker = CheckSinusPatterns(init_checker)
+                                sinus_pattern_checker.checkSinusPattern()
+                            except SinusPatternsError as e:
+                                print(e.args[0])
+                        # Check square pattern
+#                         elif init_checker.getType() == 'SQUARE':
+#                             try:
+#                                 square_pattern_checker = CheckSquarePatterns(liste, line_number, fu_type)
+#                                 square_pattern_checker.checkSquarePattern()
+#                             except SquarePatternsError as e:
+#                                 print(e.args[0])
+
+
 
                         
 
