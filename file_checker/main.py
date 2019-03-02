@@ -5,7 +5,7 @@ from utils.common import *
 from checks.checkInit import *
 # from checks.checkDATDUT import *
 # from checks.checkPatterns import *
-# from checks.checkSinusPatterns import *
+from checks.checkSinusPatterns import *
 # from checks.checkSquarePatterns import *
 # from checks.checkTrapezoidPatterns import *
 # from checks.checkBangBangPatterns import *
@@ -19,6 +19,8 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
     
     with open (C_DAT_DUT_DIR + dat_dut_file.name,'r',encoding='utf8') as file_handler:
         line_number = 0
+        
+        fu_type = getFUType(dat_dut_file.name)
         
         while True:
             line = file_handler.readline()
@@ -41,14 +43,18 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                     init_checker = CheckInit(liste, line_number)
                     # First checks
                     init_checker.checkInit()
-                except (InitialChecksError) as e:
+                except InitialChecksError as e:
                     print(e.args[0] + 'line ' + str(e.args[1]) + ' => no additionnal check for this line\n')
                     continue
                 else:
-                    fu_type = getFUType(dat_dut_file.name)
-                    
-                    if init_checker.getTypePattern() == 'SINUS':
-                        sinus_pattern_checker = CheckSinusPatterns(liste, line_number, fu_type)
+                    # Check sinus patterns
+                    if init_checker.getDefinition() == 'PATTERN' and init_checker.getType() == 'SINUS':
+                        try:
+                            sinus_pattern_checker = CheckSinusPatterns(liste, line_number, fu_type)
+                            sinus_pattern_checker.checkThisSinusPattern()
+                        except SinusPatternsError as e:
+                            print(e.args[0])
+
                         
 
 
