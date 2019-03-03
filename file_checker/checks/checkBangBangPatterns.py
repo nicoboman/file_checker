@@ -2,18 +2,18 @@
 import pandas as pd
 import numpy as np
 from utils.common import *
-from checks.checkDATDUT import *
-from checks.checkPatterns import *
 from error.datdutErrors import *
 
-class CheckBangBangPatterns(CheckPatterns):
-    "check bangbang patterns from DAT DUT file"
+class CheckBangBangPatterns():
+    "check bangbang patterns of dut file"
     
-    def __init__(self, data_frame, fu_type):
-        CheckPatterns.__init__(self, data_frame, fu_type)
-        
-        # Select bangbang pattern rows
-        self.df_bangbang_pattern_rows = self.df_pattern_rows[self.df_pattern_rows.type == "bangbang"]
+    def __init__(self, obj_init):
+        self.liste = obj_init.getListe()
+        self.line_number = obj_init.getLineNumber()
+        self.fu_type = obj_init.getFUType()
+#         self.obj_reference = obj_init
+        self.error_list = []
+        self.error_string = ''
         
         # Threshold file
         if self.fu_type == 'SR':
@@ -22,8 +22,6 @@ class CheckBangBangPatterns(CheckPatterns):
             self.threshold_file = C_THRESHOLD_DIR + C_LL_BANGBANG_THRESHOLD_FILE
         elif self.fu_type == 'UL':
             self.threshold_file = C_THRESHOLD_DIR + C_UL_BANGBANG_THRESHOLD_FILE
-        else:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: Unknown FU type: ", self.fu_type)
             
         # set df_threshold
         self.setBangBangPatternThreshold()
@@ -37,75 +35,95 @@ class CheckBangBangPatterns(CheckPatterns):
         self.pos_target_max = (self.df_threshold[self.df_threshold.parameter == 'pos_target']).iloc[0,2]
         self.slope_value_min = (self.df_threshold[self.df_threshold.parameter == 'slope_value']).iloc[0,1]
         self.slope_value_max = (self.df_threshold[self.df_threshold.parameter == 'slope_value']).iloc[0,2]
-    
-    def checkBangBangPatternIDsUnique(self):
-        self.temp_df = self.df_bangbang_pattern_rows.loc[:,'id']
         
-        if not self.temp_df.is_unique:
-            self.temp_df = self.df_bangbang_pattern_rows.loc[:, 'line':'id':C_ID_COLUMN]
-            raise BangBangPatternsError("[BangBang Pattern Error]: BangBang patterns id's are not unique, see below: \n", self.temp_df.values)
+        print(self.liste)
+        
+    def checkBangBangPattern(self):
+        self.checkMandatoryOrPointlessParameters()
+        self.checkIsNumber()
+
+        # if an error occured during check of manadatory parameters
+        # do not proceed the other checks (no point doing it because maybe parameter is not defined):
+        if len(self.error_list):
+            self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
+        else:
+#             self.checkBangBangPatternIDsUnique()
+            self.checkDelay()
+            self.checkPosTarget()
+            self.checkSlope()
+            self.checkOffset()
+            self.check600HzCommand()
+
+        # raises an error if necessary:
+        if len(self.error_list):
+            while self.error_list:
+                try:
+                    self.error_string = self.error_string + self.error_list.pop(0) + '\n'
+                except IndexError:
+                    break
+            
+            raise BangBangPatternsError(self.error_string)
+    
+#     def checkBangBangPatternIDsUnique(self):
+#         self.temp_df = self.df_bangbang_pattern_rows.loc[:,'id']
+#         
+#         if not self.temp_df.is_unique:
+#             self.temp_df = self.df_bangbang_pattern_rows.loc[:, 'line':'id':C_ID_COLUMN]
+#             raise BangBangPatternsError("[BangBang Pattern Error]: BangBang patterns id's are not unique, see below: \n", self.temp_df.values)
 
     def checkDelay(self):
-        # get lines where:
-        #   - delay_or_step_duration is out of range
-        # then return line and delay_or_step_duration columns for those lines
-        self.temp_df_low = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'delay_or_step_duration'] < self.delay_min,'line':'delay_or_step_duration':C_DELAY_OR_STEP_DURATION_COLUMN]
-        self.temp_df_high = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'delay_or_step_duration'] > self.delay_max,'line':'delay_or_step_duration':C_DELAY_OR_STEP_DURATION_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: delay_or_step_duration(s) < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: delay_or_step_duration(s) > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) < self.delay_min:
+            self.error_list.append('line ' + str(self.line_number) + ' delay < min')
+        elif float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) > self.delay_max:
+            self.error_list.append('line ' + str(self.line_number) + ' delay > max')
             
     def checkOffset(self):
-        # get lines where:
-        #   - offset is out of range
-        # then return line and offset columns for those lines
-        self.temp_df_low = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'offset'] < self.pos_init_min,'line':'offset':C_OFFSET_COLUMN]
-        self.temp_df_high = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'offset'] > self.pos_init_max,'line':'offset':C_OFFSET_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: pos init < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: pos init > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_OFFSET_COLUMN]) < self.pos_init_min:
+            self.error_list.append('line ' + str(self.line_number) + ' offset < min')
+        elif float(self.liste[C_OFFSET_COLUMN]) > self.pos_init_max:
+            self.error_list.append('line ' + str(self.line_number) + ' offset > max')
             
     def checkPosTarget(self):
-        # get lines where:
-        #   - ampl_or_stepinc_or_finalpos1 is out of range
-        # then return line and delay_or_step_duration columns for those lines
-        self.temp_df_low = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'ampl_or_stepinc_or_finalpos1'] < self.pos_target_min,'line':'ampl_or_stepinc_or_finalpos1':C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]
-        self.temp_df_high = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'ampl_or_stepinc_or_finalpos1'] > self.pos_target_max,'line':'ampl_or_stepinc_or_finalpos1':C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: pos target < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: pos target > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]) < self.pos_target_min:
+            self.error_list.append('line ' + str(self.line_number) + ' pos target < min')
+        elif float(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]) > self.pos_target_max:
+            self.error_list.append('line ' + str(self.line_number) + ' pos target > max')
     
     def checkSlope(self):
-        # get lines where:
-        #   - slope is out of range
-        # then return line and slope columns for those lines
-        self.temp_df_low = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'slope'] < self.slope_value_min,'line':'slope':C_SLOPE_COLUMN]
-        self.temp_df_high = self.df_bangbang_pattern_rows.loc[self.df_bangbang_pattern_rows.loc[:, 'slope'] > self.slope_value_max,'line':'slope':C_SLOPE_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: slope < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise BangBangPatternsError("[Bangbang Pattern Error]: slope > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_SLOPE_COLUMN]) < self.slope_value_min:
+            self.error_list.append('line ' + str(self.line_number) + ' slope < min')
+        elif float(self.liste[C_SLOPE_COLUMN]) > self.slope_value_max:
+            self.error_list.append('line ' + str(self.line_number) + ' slope > max')
             
     def checkMandatoryOrPointlessParameters(self):
         # check mandatory parameters are mentioned
         # check pointless parameters for bangbang patterns are missing
-        bangbang_pattern_mask = np.array([True, True, True, True, True, False, True, True, True, False, False, False, True, False])
+        bangbang_pattern_mask = np.array([True, True, True, True, False, True, True, True, False, False, False, True, False])
                 
-        for i in range(self.df_bangbang_pattern_rows.shape[0]):
-            bangbang_parameter_presence = np.array(self.df_bangbang_pattern_rows.iloc[i,:].notna())
-            if not np.array_equal(bangbang_pattern_mask, bangbang_parameter_presence):
-                raise BangBangPatternsError("[Bangbang Pattern Error]: mandatory parameter missing or pointless parameter specified in line: ", self.df_bangbang_pattern_rows.iloc[i,C_LINE_COLUMN])
+        # structure of the processed line
+        bangbang_pattern_presence = np.array(list(map(lambda x: True if len(x) > 0 else False, self.liste)), dtype = bool)
+        
+        # compare the two of them
+        if not np.array_equal(bangbang_pattern_mask, bangbang_pattern_presence):
+            self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter')
+
+    def check600HzCommand(self):
+        # for patterns != sinus, 600Hz parameter must always be set to FALSE:
+        if self.liste[C_IS_600HZ_CMD_COLUMN] != 'FALSE':
+            self.error_list.append('line ' + str(self.line_number) + ' invalid 600Hz parameter: must be FALSE for bangbang patterns')
+
+    def checkIsNumber(self):
+        if not isNumber(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' step duration is not a number')
+            
+        if not isNumber(self.liste[C_OFFSET_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' offset is not a number')
+
+        if not isNumber(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' step increment is not a number')
+            
+        if not isNumber(self.liste[C_SLOPE_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' slope is not a number')
 
     def setBangBangPatternThreshold(self):
         with open (self.threshold_file,'r',encoding='utf8') as self.threshold_file_handler:                

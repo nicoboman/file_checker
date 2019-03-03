@@ -8,7 +8,7 @@ from checks.checkInit import *
 from checks.checkSinusPatterns import *
 from checks.checkSquarePatterns import *
 # from checks.checkTrapezoidPatterns import *
-# from checks.checkBangBangPatterns import *
+from checks.checkBangBangPatterns import *
 # from checks.checkBlocs import *
 from error.datdutErrors import *
 
@@ -64,6 +64,13 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                                 square_pattern_checker = CheckSquarePatterns(init_checker)
                                 square_pattern_checker.checkSquarePattern()
                             except SquarePatternsError as e:
+                                print(e.args[0])
+                        # Check bangbang pattern
+                        elif init_checker.getType() == 'BANGBANG':
+                            try:
+                                bangbang_pattern_checker = CheckBangBangPatterns(init_checker)
+                                bangbang_pattern_checker.checkBangBangPattern()
+                            except BangBangPatternsError as e:
                                 print(e.args[0])
 
 

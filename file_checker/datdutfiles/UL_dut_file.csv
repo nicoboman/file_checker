@@ -14,7 +14,7 @@ PATTERN,TRAPEZOID,0,1.0,,0.012,FALSE,0.015,,,0.0015,5,5
 PATTERN,TRAPEZOID,1,10,,-0.013,FALSE,0.012,,,-0.0512,1,98
 ##############################################
 PATTERN,BANGBANG,0,0,,0.012,FALSE,0.035,,,,7,
-PATTERN,BANGBANG,1,5,,-0.012,FALSE,0.012,,,,10,
+PATTERN,BANGBANG,1,5,,-0.012,FALSE,0.012,,,,1,
 
 ####################
 ## Bloc definition #
