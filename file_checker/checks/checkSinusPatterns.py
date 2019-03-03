@@ -43,9 +43,9 @@ class CheckSinusPatterns:
 
     def checkSinusPattern(self):
         self.checkMandatoryOrPointlessParameters()
+        self.checkIsNumber()
         self.checkNbOfPointsisInteger()
         self.checkNbOfRepetisInteger()
-        self.checkIsNumber()
 
         # if an error occured during check of manadatory parameters
         # do not proceed the other checks (no point doing it because maybe parameter is not defined):
@@ -90,17 +90,6 @@ class CheckSinusPatterns:
         if not np.array_equal(sinus_pattern_mask, sinus_parameter_presence):
             self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter')
             
-    def checkConsistency(self):
-        # check if a float number is written when the expected parameter is a float number
-        sinus_pattern_mask = np.array([True, True, True, True, False, True, True, True, True, True, False, False, False])
-        
-        # structure of the processed line
-        sinus_parameter_presence = np.array(list(map(lambda x: True if len(x) > 0 else False, self.liste)), dtype = bool)
-        
-        # compare the two of them
-        if not np.array_equal(sinus_pattern_mask, sinus_parameter_presence):
-            self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter => no additionnal check for this line')
-            
     def checkIsNumber(self):
         if not isNumber(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]):
             self.error_list.append('line ' + str(self.line_number) + ' delay is not a number')
@@ -122,9 +111,9 @@ class CheckSinusPatterns:
             self.error_list.append('line ' + str(self.line_number) + ' invalid 600Hz parameter: must be TRUE/FALSE')
 
     def checkNbOfPoints(self):
-        if float(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]) < self.nb_point_min:
+        if int(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]) < self.nb_point_min:
             self.error_list.append('line ' + str(self.line_number) + ' number of points < min')
-        elif float(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]) > self.nb_point_max:
+        elif int(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]) > self.nb_point_max:
             self.error_list.append('line ' + str(self.line_number) + ' number of points > max')
     
     def checkNbOfPointsisInteger(self):
@@ -132,9 +121,9 @@ class CheckSinusPatterns:
             self.error_list.append('line ' + str(self.line_number) + ' number of points is not a positive integer')
 
     def checkNbOfRepet(self):
-        if float(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]) < self.nb_repet_min:
+        if int(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]) < self.nb_repet_min:
             self.error_list.append('line ' + str(self.line_number) + ' number of repet < min')
-        elif float(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]) > self.nb_repet_max:
+        elif int(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]) > self.nb_repet_max:
             self.error_list.append('line ' + str(self.line_number) + ' number of repet > max')
             
     def checkNbOfRepetisInteger(self):

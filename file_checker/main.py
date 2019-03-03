@@ -6,7 +6,7 @@ from checks.checkInit import *
 # from checks.checkDATDUT import *
 # from checks.checkPatterns import *
 from checks.checkSinusPatterns import *
-# from checks.checkSquarePatterns import *
+from checks.checkSquarePatterns import *
 # from checks.checkTrapezoidPatterns import *
 # from checks.checkBangBangPatterns import *
 # from checks.checkBlocs import *
@@ -59,12 +59,12 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                             except SinusPatternsError as e:
                                 print(e.args[0])
                         # Check square pattern
-#                         elif init_checker.getType() == 'SQUARE':
-#                             try:
-#                                 square_pattern_checker = CheckSquarePatterns(liste, line_number, fu_type)
-#                                 square_pattern_checker.checkSquarePattern()
-#                             except SquarePatternsError as e:
-#                                 print(e.args[0])
+                        elif init_checker.getType() == 'SQUARE':
+                            try:
+                                square_pattern_checker = CheckSquarePatterns(init_checker)
+                                square_pattern_checker.checkSquarePattern()
+                            except SquarePatternsError as e:
+                                print(e.args[0])
 
 
 
