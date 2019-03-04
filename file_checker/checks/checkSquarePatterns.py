@@ -7,11 +7,11 @@ from error.datdutErrors import *
 class CheckSquarePatterns():
     "check square patterns of dut file"
     
-    def __init__(self, obj_init):
+    def __init__(self, obj_init, id_list):
         self.liste = obj_init.getListe()
         self.line_number = obj_init.getLineNumber()
         self.fu_type = obj_init.getFUType()
-#         self.obj_reference = obj_init
+        self.id_list = id_list
         self.error_list = []
         self.error_string = ''
         
@@ -48,7 +48,7 @@ class CheckSquarePatterns():
         if len(self.error_list):
             self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
         else:
-#             self.checkSquarePatternIDsUnique()
+            self.checkSquarePatternIDsUnique()
             self.checkNbOfSteps()
             self.checkNbOfStepsIsEven()
             self.checkStepDuration()
@@ -66,12 +66,11 @@ class CheckSquarePatterns():
             
             raise SquarePatternsError(self.error_string)
 
-#     def checkSquarePatternIDsUnique(self):
-#         self.temp_df = self.df_square_pattern_rows.loc[:,'id']
-#         
-#         if not self.temp_df.is_unique:
-#             self.temp_df = self.df_square_pattern_rows.loc[:, 'line':'id':C_ID_COLUMN]
-#             raise SquarePatternsError("[Square Pattern Error]: Square patterns id's are not unique, see below: \n", self.temp_df.values)
+    def checkSquarePatternIDsUnique(self):
+        if self.liste[C_ID_COLUMN] in self.id_list:
+            self.error_list.append('line ' + str(self.line_number) + ' square pattern ids are not unique.')
+        else:
+            self.id_list.append(self.liste[C_ID_COLUMN])
 
     def checkIsNumber(self):
         if not isNumber(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]):

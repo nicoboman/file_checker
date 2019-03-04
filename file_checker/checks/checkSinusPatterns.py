@@ -8,11 +8,11 @@ from numpy import dtype
 class CheckSinusPatterns:
     "check sinus patterns of dut file"
     
-    def __init__(self, obj_init):
+    def __init__(self, obj_init, id_list):
         self.liste = obj_init.getListe()
         self.line_number = obj_init.getLineNumber()
         self.fu_type = obj_init.getFUType()
-#         self.obj_reference = obj_init
+        self.id_list = id_list
         self.error_list = []
         self.error_string = ''
         
@@ -52,7 +52,7 @@ class CheckSinusPatterns:
         if len(self.error_list):
             self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
         else:
-#             self.checkSinusPatternIDsUnique()
+            self.checkSinusPatternIDsUnique()
             self.checkAmplitude()
             self.checkNbOfPoints()
             self.checkNbOfRepet()
@@ -70,13 +70,12 @@ class CheckSinusPatterns:
             
             raise SinusPatternsError(self.error_string)
 
-#     def checkSinusPatternIDsUnique(self):
-#         TODO
-#         if not self.liste[C_ID_COLUMN] in self.obj_reference.sinus_pattern_ids:
-#             self.obj_reference.addPatternID('SINUS', self.liste[C_ID_COLUMN])
-#         else:
-#             self.error_list.append('line ' + str(self.line_number) + ' ID\'s are not unique')
-
+    def checkSinusPatternIDsUnique(self):
+        if self.liste[C_ID_COLUMN] in self.id_list:
+            self.error_list.append('line ' + str(self.line_number) + ' sinus pattern ids are not unique.')
+        else:
+            self.id_list.append(self.liste[C_ID_COLUMN])
+            
     def checkMandatoryOrPointlessParameters(self):
         # check mandatory parameters are mentioned
         # check pointless parameters for sinus patterns are missing
