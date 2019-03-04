@@ -3,5 +3,6 @@ encoding//checks/checkBangBangPatterns.py=utf-8
 encoding//checks/checkInit.py=utf-8
 encoding//checks/checkSinusPatterns.py=utf-8
 encoding//checks/checkSquarePatterns.py=utf-8
+encoding//checks/checkTrapezoidPatterns.py=utf-8
 encoding//error/datdutErrors.py=utf-8
 encoding/main.py=utf-8

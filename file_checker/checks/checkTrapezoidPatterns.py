@@ -2,18 +2,18 @@
 import pandas as pd
 import numpy as np
 from utils.common import *
-from checks.checkDATDUT import *
-from checks.checkPatterns import *
 from error.datdutErrors import *
 
-class CheckTrapezoidPatterns(CheckPatterns):
-    "check trapezoid patterns from DAT DUT file"
+class CheckTrapezoidPatterns():
+    "check trapezoid patterns of dut file"
     
-    def __init__(self, data_frame, fu_type):
-        CheckPatterns.__init__(self, data_frame, fu_type)
-        
-        # Select trapezoid pattern rows
-        self.df_trapezoid_pattern_rows = self.df_pattern_rows[self.df_pattern_rows.type == "trapezoid"]
+    def __init__(self, obj_init):
+        self.liste = obj_init.getListe()
+        self.line_number = obj_init.getLineNumber()
+        self.fu_type = obj_init.getFUType()
+#         self.obj_reference = obj_init
+        self.error_list = []
+        self.error_string = ''
         
         # Threshold file
         if self.fu_type == 'SR':
@@ -22,8 +22,6 @@ class CheckTrapezoidPatterns(CheckPatterns):
             self.threshold_file = C_THRESHOLD_DIR + C_LL_TRAPEZOID_THRESHOLD_FILE
         elif self.fu_type == 'UL':
             self.threshold_file = C_THRESHOLD_DIR + C_UL_TRAPEZOID_THRESHOLD_FILE
-        else:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: Unknown FU type: ", self.fu_type)
             
         # set df_threshold
         self.setTrapezoidPatternThreshold()
@@ -41,106 +39,119 @@ class CheckTrapezoidPatterns(CheckPatterns):
         self.slope_value_max = (self.df_threshold[self.df_threshold.parameter == 'slope_value']).iloc[0,2]
         self.inter_gap_duration_min = (self.df_threshold[self.df_threshold.parameter == 'inter_gap_duration']).iloc[0,1]
         self.inter_gap_duration_max = (self.df_threshold[self.df_threshold.parameter == 'inter_gap_duration']).iloc[0,2]
-    
-    def checkTrapezoidPatternIDsUnique(self):
-        self.temp_df = self.df_trapezoid_pattern_rows.loc[:,'id']
         
-        if not self.temp_df.is_unique:
-            self.temp_df = self.df_trapezoid_pattern_rows.loc[:, 'line':'id':C_ID_COLUMN]
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: Trapezoid patterns id's are not unique, see below: \n", self.temp_df.values)
+        print(self.liste)
+    
+    def checkTrapezoidPattern(self):
+        self.checkMandatoryOrPointlessParameters()
+        self.checkIsNumber()
+
+        # if an error occured during check of manadatory parameters
+        # do not proceed the other checks (no point doing it because maybe parameter is not defined):
+        if len(self.error_list):
+            self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
+        else:
+#                 self.checkTrapezoidPatternIDsUnique()
+            self.checkSlope()
+            self.checkStepDuration()
+            self.checkIntervalDuration()
+            self.checkPosInit()
+            self.checkPosTarget(1)
+            self.checkPosTarget(2)
+            self.check600HzCommand()
+
+        # raises an error if necessary:
+        if len(self.error_list):
+            while self.error_list:
+                try:
+                    self.error_string = self.error_string + self.error_list.pop(0) + '\n'
+                except IndexError:
+                    break
+            
+            raise TrapezoidPatternsError(self.error_string)
+
+#     def checkTrapezoidPatternIDsUnique(self):
+#         self.temp_df = self.df_trapezoid_pattern_rows.loc[:,'id']
+#         
+#         if not self.temp_df.is_unique:
+#             self.temp_df = self.df_trapezoid_pattern_rows.loc[:, 'line':'id':C_ID_COLUMN]
+#             raise TrapezoidPatternsError("[Trapezoid Pattern Error]: Trapezoid patterns id's are not unique, see below: \n", self.temp_df.values)
 
     def checkSlope(self):
-        # get lines where:
-        #   - slope < min
-        #   - slope > max   
-        # then return line and delay_or_step_duration columns for those lines
-        self.temp_df_low = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'slope'] < self.slope_value_min,'line':'slope':C_SLOPE_COLUMN]
-        self.temp_df_high = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'slope'] > self.slope_value_max,'line':'slope':C_SLOPE_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: slope < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: slope > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_SLOPE_COLUMN]) < self.slope_value_min:
+            self.error_list.append('line ' + str(self.line_number) + ' slope < min')
+        elif float(self.liste[C_SLOPE_COLUMN]) > self.slope_value_max:
+            self.error_list.append('line ' + str(self.line_number) + ' slope > max')
 
     def checkStepDuration(self):
-        # get lines where:
-        #   - delay_or_step_duration < min
-        #   - delay_or_step_duration > max   
-        # then return line and delay_or_step_duration columns for those lines
-        self.temp_df_low = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'delay_or_step_duration'] < self.step_duration_min,'line':'delay_or_step_duration':C_DELAY_OR_STEP_DURATION_COLUMN]
-        self.temp_df_high = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'delay_or_step_duration'] > self.step_duration_max,'line':'delay_or_step_duration':C_DELAY_OR_STEP_DURATION_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: step duration < min in line(s) below: \n", self.temp_df_low.values)
+        if float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) < self.step_duration_min:
+            self.error_list.append('line ' + str(self.line_number) + ' step duration < min')
+        elif float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) > self.step_duration_max:
+            self.error_list.append('line ' + str(self.line_number) + ' step duration > max')
             
-        if not self.temp_df_high.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: step duration > max in line(s) below: \n", self.temp_df_high.values)
-
     def checkIntervalDuration(self):
-        # get lines where:
-        #   - interval_duration < min
-        #   - interval_duration > max
-        # then return line and interval_duration columns for those lines            
-        self.temp_df_low = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'interval_duration'] < self.inter_gap_duration_min,'line':'interval_duration':C_INTERVAL_DURATION_COLUMN]
-        self.temp_df_high = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'interval_duration'] > self.inter_gap_duration_max,'line':'interval_duration':C_INTERVAL_DURATION_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: interval duration < min in line(s) below: \n", self.temp_df_low.values)
+        if float(self.liste[C_INTERVAL_DURATION_COLUMN]) < self.inter_gap_duration_min:
+            self.error_list.append('line ' + str(self.line_number) + ' interval duration < min')
+        elif float(self.liste[C_INTERVAL_DURATION_COLUMN]) > self.inter_gap_duration_max:
+            self.error_list.append('line ' + str(self.line_number) + ' interval duration > max')
             
-        if not self.temp_df_high.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: interval duration > max in line(s) below: \n", self.temp_df_high.values)
-
     def checkMandatoryOrPointlessParameters(self):
         # check mandatory parameters are mentioned
         # check pointless parameters for trapezoid patterns are missing
-        trapezoid_pattern_mask = np.array([True, True, True, True, True, False, True, True, True, True, False, False, True, True])
+        trapezoid_pattern_mask = np.array([True, True, True, True, False, True, True, True, False, False, True, True, True])
                 
-        for i in range(self.df_trapezoid_pattern_rows.shape[0]):
-            trapezoid_parameter_presence = np.array(self.df_trapezoid_pattern_rows.iloc[i,:].notna())
-            if not np.array_equal(trapezoid_pattern_mask, trapezoid_parameter_presence):
-                raise TrapezoidPatternsError("[Trapezoid Pattern Error]: mandatory parameter missing or pointless parameter specified in line: ", self.df_trapezoid_pattern_rows.iloc[i,C_LINE_COLUMN])
+        # structure of the processed line
+        trapezoid_pattern_presence = np.array(list(map(lambda x: True if len(x) > 0 else False, self.liste)), dtype = bool)
+        
+        # compare the two of them
+        if not np.array_equal(trapezoid_pattern_mask, trapezoid_pattern_presence):
+            self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter')
 
     def checkPosInit(self):
-        # get lines where:
-        #   - pos init < min
-        #   - pos init > max
-        # then return line and offset column for those lines            
-        self.temp_df_low = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'offset'] < self.pos_init_min,'line':'offset':C_OFFSET_COLUMN]
-        self.temp_df_high = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, 'offset'] > self.pos_init_max,'line':'offset':C_OFFSET_COLUMN]
-
-        if not self.temp_df_low.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: pos init < min in line(s) below: \n", self.temp_df_low.values)
-            
-        if not self.temp_df_high.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: pos init > max in line(s) below: \n", self.temp_df_high.values)
+        if float(self.liste[C_OFFSET_COLUMN]) < self.pos_init_min:
+            self.error_list.append('line ' + str(self.line_number) + ' pos init < min')
+        elif float(self.liste[C_OFFSET_COLUMN]) > self.pos_init_max:
+            self.error_list.append('line ' + str(self.line_number) + ' pos init > max')
             
     def checkPosTarget(self, target):
-        # get lines where:
-        #   - pos target i (i=1 or 2) < min
-        #   - pos target i (i=1 or 2) > max
-        # then return line and ampl_or_stepinc_or_finalpos1 or finalpos2 column for those lines        
         if target == 1:
-            field_name = 'ampl_or_stepinc_or_finalpos1'
+            label = ' pos target1'
             val_min = self.pos_target1_min
             val_max = self.pos_target1_max
             column = C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN
         elif target == 2:
-            field_name = 'finalpos2'
+            label = ' pos target2'
             val_min = self.pos_target2_min
             val_max = self.pos_target2_max
             column = C_FINAL_POS2_COLUMN
-        else:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: Unknown target position (must be 1 or 2)", None)
-        
-        self.temp_df_low = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, field_name] < val_min,'line':field_name:column]
-        self.temp_df_high = self.df_trapezoid_pattern_rows.loc[self.df_trapezoid_pattern_rows.loc[:, field_name] > val_max,'line':field_name:column]
+        if float(self.liste[column]) < val_min:
+            self.error_list.append('line ' + str(self.line_number) + label + ' < min')
+        elif float(self.liste[column]) > val_max:
+            self.error_list.append('line ' + str(self.line_number) + label + ' > max')
 
-        if not self.temp_df_low.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: pos target < min in line(s) below: \n", self.temp_df_low.values)
+    def checkIsNumber(self):
+        if not isNumber(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' step duration is not a number')
             
-        if not self.temp_df_high.empty:
-            raise TrapezoidPatternsError("[Trapezoid Pattern Error]: pos target > max in line(s) below: \n", self.temp_df_high.values)
+        if not isNumber(self.liste[C_OFFSET_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' offset is not a number')
+
+        if not isNumber(self.liste[C_AMPL_OR_STEP_INC_OR_FINAL_POS1_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' final pos1 is not a number')
+            
+        if not isNumber(self.liste[C_FINAL_POS2_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' final pos2 is not a number')
+            
+        if not isNumber(self.liste[C_SLOPE_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' slope is not a number')
+            
+        if not isNumber(self.liste[C_INTERVAL_DURATION_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' interval duration is not a number')
+
+    def check600HzCommand(self):
+        # for patterns != sinus, 600Hz parameter must always be set to FALSE:
+        if self.liste[C_IS_600HZ_CMD_COLUMN] != 'FALSE':
+            self.error_list.append('line ' + str(self.line_number) + ' invalid 600Hz parameter: must be FALSE for trapezoid patterns')
 
     def setTrapezoidPatternThreshold(self):
         with open (self.threshold_file,'r',encoding='utf8') as self.threshold_file_handler:                
