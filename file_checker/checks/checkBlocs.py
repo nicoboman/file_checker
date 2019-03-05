@@ -24,10 +24,9 @@ class CheckBlocs():
         # do not proceed the other checks (no point doing it because maybe parameter is not defined):
         if len(self.error_list):
             self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
-#         else:
+        else:
+            self.checkAxis()
 #             self.checkBlocIDsUnique()
-#             self.checkSeqNum()
-#             self.checkAxis()
 #             self.checkFirstAndLastSinusPatternNum(sinus_pattern_checker)
 #             self.checkFirstAndLastSquarePatternNum(square_pattern_checker)
 #             self.checkFirstAndLastTrapezoidPatternNum(trapezoid_pattern_checker)
@@ -60,33 +59,9 @@ class CheckBlocs():
         if not isNumber(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]):
             self.error_list.append('line ' + str(self.line_number) + ' delay is not a number')
                 
-    def checkSeqNum(self):
-        # get lines where:
-        #   - id column <= 0
-        # then return line and id columns for those lines
-        self.temp_df = self.df_bloc_rows.loc[(self.df_bloc_rows.loc[:, 'id'] <= 0),'line':'id':C_ID_COLUMN]
-        
-        if not self.temp_df.empty:
-            raise BlocError("[Bloc Error]: seq num <= 0 in line(s) below: ", self.temp_df.values)
-            
     def checkAxis(self):
-        # get lines where:
-        #   - axis column != "U"
-        # AND where:
-        # - axis column != "V"
-        # AND where:
-        # - axis column != "+U+V"
-        # AND where:
-        # - axis column != "+U-V"
-        # then return line and axis columns for those lines
-        self.temp_df = self.df_bloc_rows.loc[(self.df_dat_dut.loc[:, 'axis'] != 'U')
-                        & (self.df_bloc_rows.loc[:, 'axis'] != 'V')
-                        & (self.df_bloc_rows.loc[:, 'axis'] != '+U+V')
-                        & (self.df_bloc_rows.loc[:, 'axis'] != '+U-V'),
-                        'line':'axis':C_AXIS_COLUMN]
-    
-        if not self.temp_df.empty:
-            raise BlocError("[Bloc Error]: Unknown axis in line(s) below: ", self.temp_df.values)
+        if self.liste[C_AXIS_COLUMN] not in ['U', 'V', '+U-V', '-U+V']:
+            self.error_list.append('line ' + str(self.line_number) + ' invalid axis')
             
     # In blocs, check if all first and last sinus pattern id's are defined
     def checkFirstAndLastSinusPatternNum(self, sinus_patt_rows):
