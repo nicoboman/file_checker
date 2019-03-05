@@ -7,7 +7,7 @@ from checks.checkSinusPatterns import *
 from checks.checkSquarePatterns import *
 from checks.checkTrapezoidPatterns import *
 from checks.checkBangBangPatterns import *
-# from checks.checkBlocs import *
+from checks.checkBlocs import *
 from error.datdutErrors import *
 
 p_datdut_dir = Path(C_DAT_DUT_DIR)
@@ -16,6 +16,7 @@ l_sinus_pattern_ids = []
 l_square_pattern_ids = []
 l_bangbang_pattern_ids = []
 l_trapezoid_pattern_ids = []
+l_bloc_ids = []
 
 for dat_dut_file in p_datdut_dir.glob('*.csv'):
     displayFileName(dat_dut_file.name)
@@ -88,6 +89,15 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                                 trapezoid_pattern_checker.checkTrapezoidPattern()
                             except TrapezoidPatternsError as e:
                                 print(e.args[0])
+                    # Check blocs
+                    elif init_checker.getDefinition() == 'BLOC':
+                            try:
+                                bloc_checker = CheckBlocs(init_checker, l_bloc_ids)
+                                bloc_checker.checkBloc()
+                            except BlocError as e:
+                                print(e.args[0])
+
+
 
 #             if not pattern_check_error:
 #                 # no error during pattern checks => bloc checks

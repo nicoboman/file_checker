@@ -7,16 +7,8 @@ class FilePrefixError(Exception):
     "error in prefix of csv file"    
     pass
 
-class DataFrameCreatorError(Exception):
-    "errors for creation of DataFrame from DAT DUT file"    
-    pass
-
 class CommonError(Exception):
     "errors for common check from DAT DUT file"    
-    pass
-
-class PatternsError(Exception):
-    "errors for patterns check from DAT DUT file"    
     pass
 
 class SinusPatternsError(Exception):

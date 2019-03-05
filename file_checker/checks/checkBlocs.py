@@ -2,33 +2,47 @@
 import pandas as pd
 import numpy as np
 from utils.common import *
-from checks.checkDATDUT import *
 from error.datdutErrors import *
 
-class CheckBlocs(CheckDATDUT):
-    "check blocs from DAT DUT file"
+class CheckBlocs():
+    "check blocs of dut file"
     
-    def __init__(self, data_frame, fu_type):
-        CheckDATDUT.__init__(self, data_frame, fu_type)
+    def __init__(self, obj_init, id_list):
+        self.liste = obj_init.getListe()
+        self.line_number = obj_init.getLineNumber()
+        self.id_list = id_list
+        self.error_list = []
+        self.error_string = ''
         
-        # Select bloc rows
-        self.df_bloc_rows = self.df_dat_dut[self.df_dat_dut.definition == "bloc"]
-        
-        # Select sinus bloc rows
-        self.df_sinus_bloc_rows = self.df_bloc_rows[self.df_bloc_rows.type == "sinus"]
+        print(self.liste)
+    
+    def checkBloc(self):
+        self.checkMandatoryOrPointlessParameters()
+        self.checkIsNumber()
 
-        # Select square bloc rows
-        self.df_square_bloc_rows = self.df_bloc_rows[self.df_bloc_rows.type == "square"]
-        
-        # Select trapezoid bloc rows
-        self.df_trapezoid_bloc_rows = self.df_bloc_rows[self.df_bloc_rows.type == "trapezoid"]
+        # if an error occured during check of manadatory parameters
+        # do not proceed the other checks (no point doing it because maybe parameter is not defined):
+        if len(self.error_list):
+            self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
+#         else:
+#             self.checkBlocIDsUnique()
+#             self.checkSeqNum()
+#             self.checkAxis()
+#             self.checkFirstAndLastSinusPatternNum(sinus_pattern_checker)
+#             self.checkFirstAndLastSquarePatternNum(square_pattern_checker)
+#             self.checkFirstAndLastTrapezoidPatternNum(trapezoid_pattern_checker)
+#             self.checkFirstAndLastBangbangPatternNum(bangbang_pattern_checker)
 
-        # Select bangbang bloc rows
-        self.df_bangbang_bloc_rows = self.df_bloc_rows[self.df_bloc_rows.type == "bangbang"]
-        
-        # List of position of first pattern num and last pattern num in DAT DUT file for bloc definition
-        self.l_pattern_ids_columns = [C_NB_ITEM_OR_FIRST_PATT_NUM, C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]
-        
+        # raises an error if necessary:
+        if len(self.error_list):
+            while self.error_list:
+                try:
+                    self.error_string = self.error_string + self.error_list.pop(0) + '\n'
+                except IndexError:
+                    break
+            
+            raise BlocError(self.error_string)
+
     def checkBlocIDsUnique(self):
         self.temp_df = self.df_bloc_rows.loc[:,'id']
         
@@ -36,18 +50,16 @@ class CheckBlocs(CheckDATDUT):
             self.temp_df = self.df_bloc_rows.loc[:, 'line':'id':C_ID_COLUMN]
             raise BlocError("[Bloc Error]: Bloc id's are not unique, see below: \n", self.temp_df.values)
     
-    def checkFirstPattNumisInteger(self):
-        # first pattern number must always be an integer        
-        for i in range(self.df_bloc_rows.shape[0]):
-            if not isInteger(self.df_bloc_rows.iloc[i,C_NB_ITEM_OR_FIRST_PATT_NUM]):
-                raise BlocError("[Bloc Error]: first pattern number is not an integer in line: ", self.df_bloc_rows.iloc[i,C_LINE_COLUMN])
-            
-    def checkLastPattNumisInteger(self):
-        # last pattern number must always be an integer        
-        for i in range(self.df_bloc_rows.shape[0]):
-            if not isInteger(self.df_bloc_rows.iloc[i,C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]):
-                raise BlocError("[Bloc Error]: last pattern number is not an integer in line: ", self.df_bloc_rows.iloc[i,C_LINE_COLUMN])
-    
+    def checkIsNumber(self):
+        if not isNumber(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' delay is not a number')
+
+        if not isNumber(self.liste[C_NB_ITEM_OR_FIRST_PATT_NUM]):
+            self.error_list.append('line ' + str(self.line_number) + ' first pattern is not a number')
+
+        if not isNumber(self.liste[C_NB_REPET_OR_LAST_PATT_NUM_COLUMN]):
+            self.error_list.append('line ' + str(self.line_number) + ' delay is not a number')
+                
     def checkSeqNum(self):
         # get lines where:
         #   - id column <= 0
@@ -156,10 +168,12 @@ class CheckBlocs(CheckDATDUT):
 
     def checkMandatoryOrPointlessParameters(self):
         # check mandatory parameters are mentioned
-        # check pointless parameters for bloc are missing
-        bloc_mask = np.array([True, True, True, True, True, True, False, False, False, False, True, True, False, False])
+        # check pointless parameters for square patterns are missing
+        bloc_pattern_mask = np.array([True, True, True, True, True, False, False, False, True, True, False, False, False])
                 
-        for i in range(self.df_bloc_rows.shape[0]):
-            bloc_parameter_presence = np.array(self.df_bloc_rows.iloc[i,:].notna())
-            if not np.array_equal(bloc_mask, bloc_parameter_presence):
-                raise BlocError("[Bloc Error]: mandatory parameter missing or pointless parameter specified in line: ", [self.df_bloc_rows.iloc[i,C_LINE_COLUMN]])
+        # structure of the processed line
+        bloc_pattern_presence = np.array(list(map(lambda x: True if len(x) > 0 else False, self.liste)), dtype = bool)
+        
+        # compare the two of them
+        if not np.array_equal(bloc_pattern_mask, bloc_pattern_presence):
+            self.error_list.append('line ' + str(self.line_number) + ' mandatory parameter absent or pointless parameter')
