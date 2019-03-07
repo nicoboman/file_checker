@@ -8,6 +8,7 @@ from checks.checkSquarePatterns import *
 from checks.checkTrapezoidPatterns import *
 from checks.checkBangBangPatterns import *
 from checks.checkBlocs import *
+from checks.checkID import *
 from error.datdutErrors import *
 
 p_datdut_dir = Path(C_DAT_DUT_DIR)
@@ -20,6 +21,8 @@ l_bloc_ids = []
 
 for dat_dut_file in p_datdut_dir.glob('*.csv'):
     displayFileName(dat_dut_file.name)
+    
+    b_id_error_flag = False
     
     # emptying list of ids before checking new file
     l_sinus_pattern_ids.clear()
@@ -52,12 +55,16 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                     init_checker = CheckInit(liste, line_number, getFUType(dat_dut_file.name))
                     # First checks
                     init_checker.checkInit()
+                # main error: unable to determine the FU => move to next file
                 except FilePrefixError:
                     print('Unable to set the FU type => no additional check for this file\n')
                     break
+                # important error: line is inconsistent => move to next line
                 except InitialChecksError as e:
                     print(e.args[0] + 'line ' + str(e.args[1]) + ' => no additional check for this line\n')
+                    b_id_error_flag = True
                     continue
+                # main characteristics are ok => check the line
                 else:
                     # Check patterns
                     if init_checker.getDefinition() == 'PATTERN':
@@ -96,8 +103,10 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                                 bloc_checker.checkBloc()
                             except BlocError as e:
                                 print(e.args[0])
-
-
+        # if no error during checks of ids:
+        if not b_id_error_flag:
+            id_checker = CheckID(C_DAT_DUT_DIR + dat_dut_file.name)
+            
 
 #             if not pattern_check_error:
 #                 # no error during pattern checks => bloc checks

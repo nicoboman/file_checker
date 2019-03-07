@@ -35,9 +35,7 @@ class CheckSquarePatterns():
         self.step_duration_max = (self.df_threshold[self.df_threshold.parameter == 'step_duration']).iloc[0,2]
         self.step_increment_min = (self.df_threshold[self.df_threshold.parameter == 'step_increment']).iloc[0,1]
         self.step_increment_max = (self.df_threshold[self.df_threshold.parameter == 'step_increment']).iloc[0,2]
-        
-        print(self.liste)
-    
+            
     def checkSquarePattern(self):
         self.checkMandatoryOrPointlessParameters()
         self.checkIsNumber()

@@ -39,9 +39,7 @@ class CheckTrapezoidPatterns():
         self.slope_value_max = (self.df_threshold[self.df_threshold.parameter == 'slope_value']).iloc[0,2]
         self.inter_gap_duration_min = (self.df_threshold[self.df_threshold.parameter == 'inter_gap_duration']).iloc[0,1]
         self.inter_gap_duration_max = (self.df_threshold[self.df_threshold.parameter == 'inter_gap_duration']).iloc[0,2]
-        
-        print(self.liste)
-    
+            
     def checkTrapezoidPattern(self):
         self.checkMandatoryOrPointlessParameters()
         self.checkIsNumber()

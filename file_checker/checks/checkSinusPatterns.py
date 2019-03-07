@@ -39,8 +39,6 @@ class CheckSinusPatterns:
         self.nb_repet_min = (self.df_threshold[self.df_threshold.parameter == 'nb_repet']).iloc[0,1]
         self.nb_repet_max = (self.df_threshold[self.df_threshold.parameter == 'nb_repet']).iloc[0,2]
         
-        print(self.liste)
-
     def checkSinusPattern(self):
         self.checkMandatoryOrPointlessParameters()
         self.checkIsNumber()

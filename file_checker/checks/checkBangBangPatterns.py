@@ -35,9 +35,7 @@ class CheckBangBangPatterns():
         self.pos_target_max = (self.df_threshold[self.df_threshold.parameter == 'pos_target']).iloc[0,2]
         self.slope_value_min = (self.df_threshold[self.df_threshold.parameter == 'slope_value']).iloc[0,1]
         self.slope_value_max = (self.df_threshold[self.df_threshold.parameter == 'slope_value']).iloc[0,2]
-        
-        print(self.liste)
-        
+                
     def checkBangBangPattern(self):
         self.checkMandatoryOrPointlessParameters()
         self.checkIsNumber()
