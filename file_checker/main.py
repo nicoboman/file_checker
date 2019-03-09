@@ -93,7 +93,7 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
         # if no error during checks of ids:
         if not b_id_error_flag:
             id_checker = CheckID(C_DAT_DUT_DIR + dat_dut_file.name)
-#             id_checker.checkSinusIDs()
+            id_checker.checkSinusIDs()
             
 
 #             if not pattern_check_error:
