@@ -13,23 +13,10 @@ from error.datdutErrors import *
 
 p_datdut_dir = Path(C_DAT_DUT_DIR)
 
-l_sinus_pattern_ids = []
-l_square_pattern_ids = []
-l_bangbang_pattern_ids = []
-l_trapezoid_pattern_ids = []
-l_bloc_ids = []
-
 for dat_dut_file in p_datdut_dir.glob('*.csv'):
     displayFileName(dat_dut_file.name)
-    
     b_id_error_flag = False
-    
-    # emptying list of ids before checking new file
-    l_sinus_pattern_ids.clear()
-    l_square_pattern_ids.clear()
-    l_bangbang_pattern_ids.clear()
-    l_trapezoid_pattern_ids.clear()
-    
+        
     with open (C_DAT_DUT_DIR + dat_dut_file.name,'r',encoding='utf8') as file_handler:
         line_number = 0
         
@@ -71,41 +58,42 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                         # Check sinus pattern
                         if init_checker.getType() == 'SINUS':
                             try:
-                                sinus_pattern_checker = CheckSinusPatterns(init_checker, l_sinus_pattern_ids)
+                                sinus_pattern_checker = CheckSinusPatterns(init_checker)
                                 sinus_pattern_checker.checkSinusPattern()
                             except SinusPatternsError as e:
                                 print(e.args[0])
                         # Check square pattern
                         elif init_checker.getType() == 'SQUARE':
                             try:
-                                square_pattern_checker = CheckSquarePatterns(init_checker, l_square_pattern_ids)
+                                square_pattern_checker = CheckSquarePatterns(init_checker)
                                 square_pattern_checker.checkSquarePattern()
                             except SquarePatternsError as e:
                                 print(e.args[0])
                         # Check bangbang pattern
                         elif init_checker.getType() == 'BANGBANG':
                             try:
-                                bangbang_pattern_checker = CheckBangBangPatterns(init_checker, l_bangbang_pattern_ids)
+                                bangbang_pattern_checker = CheckBangBangPatterns(init_checker)
                                 bangbang_pattern_checker.checkBangBangPattern()
                             except BangBangPatternsError as e:
                                 print(e.args[0])
                         # Check trapezoid pattern
                         elif init_checker.getType() == 'TRAPEZOID':
                             try:
-                                trapezoid_pattern_checker = CheckTrapezoidPatterns(init_checker, l_trapezoid_pattern_ids)
+                                trapezoid_pattern_checker = CheckTrapezoidPatterns(init_checker)
                                 trapezoid_pattern_checker.checkTrapezoidPattern()
                             except TrapezoidPatternsError as e:
                                 print(e.args[0])
                     # Check blocs
                     elif init_checker.getDefinition() == 'BLOC':
                             try:
-                                bloc_checker = CheckBlocs(init_checker, l_bloc_ids)
+                                bloc_checker = CheckBlocs(init_checker)
                                 bloc_checker.checkBloc()
                             except BlocError as e:
                                 print(e.args[0])
         # if no error during checks of ids:
         if not b_id_error_flag:
             id_checker = CheckID(C_DAT_DUT_DIR + dat_dut_file.name)
+#             id_checker.checkSinusIDs()
             
 
 #             if not pattern_check_error:
@@ -113,10 +101,7 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
 #                 try:
 #                     # Checks of Bloc rows of DAT DUT file
 #                     bloc_checker.checkBlocIDsUnique()
-#                     bloc_checker.checkFirstPattNumisInteger()
-#                     bloc_checker.checkLastPattNumisInteger()
 #                     bloc_checker.checkSeqNum()
-#                     bloc_checker.checkAxis()
 #                     bloc_checker.checkFirstAndLastSinusPatternNum(sinus_pattern_checker)
 #                     bloc_checker.checkFirstAndLastSquarePatternNum(square_pattern_checker)
 #                     bloc_checker.checkFirstAndLastTrapezoidPatternNum(trapezoid_pattern_checker)

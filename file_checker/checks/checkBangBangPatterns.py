@@ -7,11 +7,10 @@ from error.datdutErrors import *
 class CheckBangBangPatterns():
     "check bangbang patterns of dut file"
     
-    def __init__(self, obj_init, id_list):
+    def __init__(self, obj_init):
         self.liste = obj_init.getListe()
         self.line_number = obj_init.getLineNumber()
         self.fu_type = obj_init.getFUType()
-        self.id_list = id_list
         self.error_list = []
         self.error_string = ''
         
@@ -45,7 +44,6 @@ class CheckBangBangPatterns():
         if len(self.error_list):
             self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
         else:
-            self.checkBangBangPatternIDsUnique()
             self.checkDelay()
             self.checkPosTarget()
             self.checkSlope()
@@ -62,12 +60,6 @@ class CheckBangBangPatterns():
             
             raise BangBangPatternsError(self.error_string)
     
-    def checkBangBangPatternIDsUnique(self):
-        if self.liste[C_ID_COLUMN] in self.id_list:
-            self.error_list.append('line ' + str(self.line_number) + ' bangbang pattern ids are not unique.')
-        else:
-            self.id_list.append(self.liste[C_ID_COLUMN])
-
     def checkDelay(self):
         if float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) < self.delay_min:
             self.error_list.append('line ' + str(self.line_number) + ' delay < min')

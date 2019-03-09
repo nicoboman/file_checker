@@ -7,11 +7,10 @@ from error.datdutErrors import *
 class CheckTrapezoidPatterns():
     "check trapezoid patterns of dut file"
     
-    def __init__(self, obj_init, id_list):
+    def __init__(self, obj_init):
         self.liste = obj_init.getListe()
         self.line_number = obj_init.getLineNumber()
         self.fu_type = obj_init.getFUType()
-        self.id_list = id_list
         self.error_list = []
         self.error_string = ''
         
@@ -49,7 +48,6 @@ class CheckTrapezoidPatterns():
         if len(self.error_list):
             self.error_list.append('line ' + str(self.line_number) + ' error in type/structure of parameters => no additionnal check for this line')
         else:
-            self.checkTrapezoidPatternIDsUnique()
             self.checkSlope()
             self.checkStepDuration()
             self.checkIntervalDuration()
@@ -67,12 +65,6 @@ class CheckTrapezoidPatterns():
                     break
             
             raise TrapezoidPatternsError(self.error_string)
-
-    def checkTrapezoidPatternIDsUnique(self):
-        if self.liste[C_ID_COLUMN] in self.id_list:
-            self.error_list.append('line ' + str(self.line_number) + ' trapezoid pattern ids are not unique.')
-        else:
-            self.id_list.append(self.liste[C_ID_COLUMN])
 
     def checkSlope(self):
         if float(self.liste[C_SLOPE_COLUMN]) < self.slope_value_min:

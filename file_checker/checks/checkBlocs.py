@@ -7,15 +7,12 @@ from error.datdutErrors import *
 class CheckBlocs():
     "check blocs of dut file"
     
-    def __init__(self, obj_init, id_list):
+    def __init__(self, obj_init):
         self.liste = obj_init.getListe()
         self.line_number = obj_init.getLineNumber()
-        self.id_list = id_list
         self.error_list = []
         self.error_string = ''
-        
-        print(self.liste)
-    
+            
     def checkBloc(self):
         self.checkMandatoryOrPointlessParameters()
         self.checkIsNumber()
@@ -42,13 +39,6 @@ class CheckBlocs():
             
             raise BlocError(self.error_string)
 
-    def checkBlocIDsUnique(self):
-        self.temp_df = self.df_bloc_rows.loc[:,'id']
-        
-        if not self.temp_df.is_unique:
-            self.temp_df = self.df_bloc_rows.loc[:, 'line':'id':C_ID_COLUMN]
-            raise BlocError("[Bloc Error]: Bloc id's are not unique, see below: \n", self.temp_df.values)
-    
     def checkIsNumber(self):
         if not isNumber(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]):
             self.error_list.append('line ' + str(self.line_number) + ' delay is not a number')

@@ -4,6 +4,8 @@ Created on 7 mars 2019
 @author: nicolas
 '''
 import numpy as np
+from utils.common import *
+from matplotlib.pyplot import axis
 
 class CheckID(object):
     '''
@@ -17,4 +19,7 @@ class CheckID(object):
         '''
         self.df = np.genfromtxt(file, dtype='str', comments='#', delimiter=',', skip_header=1, autostrip=True, encoding='utf-8')
         print(self.df)
+        
+#     def checkSinusIDs(self):
+
         
