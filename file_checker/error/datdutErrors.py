@@ -31,3 +31,7 @@ class BlocError(Exception):
     "errors for bloc check from DAT DUT file"    
     pass
 
+class IDsError(Exception):
+    "error in the initial checks"
+    pass
+
