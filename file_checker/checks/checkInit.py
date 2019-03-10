@@ -11,10 +11,6 @@ class CheckInit:
         self.fu_type = fu_type
         self.error_list = []
         self.error_string = ''
-#         self.sinus_pattern_ids = []
-#         self.square_pattern_ids = []
-#         self.trapezoid_pattern_ids = []
-#         self.bangbang_pattern_ids = []
         
     def checkInit(self):
         # elementary checks on the structure of line, definition and type
@@ -28,7 +24,7 @@ class CheckInit:
             self.error_list.append('line ' + str(self.line_number) + ' invalid type')
             
         # check if id is an integer and is >= 0:
-        if not self.liste[C_ID_COLUMN].isdigit():
+        if not self.liste[C_ID_COLUMN].isdigit() and self.liste[C_DEFINITION_COLUMN] != 'FDIR':
             self.error_list.append('line ' + str(self.line_number) + ' ID is not a positive integer')
         
         # raises an error if necessary:
@@ -55,13 +51,3 @@ class CheckInit:
     
     def getFUType(self):
         return self.fu_type
-    
-#     def addPatternID(self, type, id):
-#         if type == 'SINUS':
-#             self.sinus_pattern_ids.append(id)
-#         elif type == 'SQUARE':
-#             self.square_pattern_ids.append(id)
-#         elif type == 'TRAPEZOID':
-#             self.trapezoid_pattern_ids.append(id)
-#         elif type == 'BANGBANG':
-#             self.bangbang_pattern_ids.append(id)

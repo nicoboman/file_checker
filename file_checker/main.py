@@ -8,6 +8,7 @@ from checks.checkTrapezoidPatterns import *
 from checks.checkBangBangPatterns import *
 from checks.checkBlocs import *
 from checks.checkID import *
+from checks.checkFdir import *
 from error.datdutErrors import *
 
 p_datdut_dir = Path(C_DAT_DUT_DIR)
@@ -89,6 +90,13 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
                                 bloc_checker = CheckBlocs(init_checker)
                                 bloc_checker.checkBloc()
                             except BlocError as e:
+                                print(e.args[0])
+                    # Check fdir
+                    elif init_checker.getDefinition() == 'FDIR':
+                            try:
+                                fdir_checker = CheckFDIR(init_checker)
+                                fdir_checker.checkFdir()
+                            except FdirError as e:
                                 print(e.args[0])
         # if no error during checks of ids:
         if not b_id_error_flag:

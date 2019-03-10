@@ -27,6 +27,5 @@ BLOC,BANGBANG,4,1.5,-U+V,,,,0,1,,,
 ####################
 ## Fdir definition #
 ####################
-FDIR,CORRIDOR,1,0,U,,,,0,1,,,
-FDIR,BEHAVIOUR,1,0,U,,,,0,1,,,
-
+FDIR,CORRIDOR,,,f,,f,,,,4,2,1
+FDIR,BEHAVIOUR,,f,,,,,,,4,2,1

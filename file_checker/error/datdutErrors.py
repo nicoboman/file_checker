@@ -35,3 +35,8 @@ class IDsError(Exception):
     "error in the initial checks"
     pass
 
+class FdirError(Exception):
+    "error in the initial checks"
+    pass
+
+

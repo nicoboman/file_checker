@@ -135,4 +135,3 @@ class CheckSinusPatterns:
         with open (self.threshold_file,'r',encoding='utf8') as self.threshold_file_handler:                
             # Creation of df_threshold data frame:
             self.df_threshold = pd.read_csv(self.threshold_file, sep=C_SEPARATOR, comment=C_COMMENT, header = 0, skip_blank_lines=True)
-                       
