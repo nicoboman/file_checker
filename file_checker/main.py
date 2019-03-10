@@ -98,25 +98,5 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
             except IDsError as e:
                 print(e.args[0])
 
-            
-
-#             if not pattern_check_error:
-#                 # no error during pattern checks => bloc checks
-#                 try:
-#                     # Checks of Bloc rows of DAT DUT file
-#                     bloc_checker.checkBlocIDsUnique()
-#                     bloc_checker.checkSeqNum()
-#                     bloc_checker.checkFirstAndLastSinusPatternNum(sinus_pattern_checker)
-#                     bloc_checker.checkFirstAndLastSquarePatternNum(square_pattern_checker)
-#                     bloc_checker.checkFirstAndLastTrapezoidPatternNum(trapezoid_pattern_checker)
-#                     bloc_checker.checkFirstAndLastBangbangPatternNum(bangbang_pattern_checker)
-#                     bloc_checker.checkMandatoryOrPointlessParameters()
-#                 except BlocError as e:
-#                     print(e.args[0], end = "")
-#                     [print(exception_info, end = "") for exception_info in e.args[1]]
-#                     print('\n', end = "")
-#                 else:
-#                     print("[OK] No error in " + dat_dut_file.name)
-
 # print("\nStrike any key to quit...")
 # input()
