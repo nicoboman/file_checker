@@ -24,7 +24,8 @@ C_LL_TRAPEZOID_THRESHOLD_FILE = "ll_trapezoid_pattern.properties"
 C_LL_BANGBANG_THRESHOLD_FILE = "ll_bangbang_pattern.properties"
 
 # CSV File structure:
-
+C_FIRST_FU_CHARACTER_INCLUDE = 4
+C_LAST_FU_CHARACTER_EXCLUDE = 6
 C_SEPARATOR=','
 C_COMMENT='#'
 C_NB_OF_FIELD = 13
@@ -70,9 +71,9 @@ def displayFileName(file_name):
     
 def getFUType(file_name):
     fu_type = 'undef'
-    fu_type = file_name[0:2]
+    fu_type = file_name[C_FIRST_FU_CHARACTER_INCLUDE:C_LAST_FU_CHARACTER_EXCLUDE]
     if fu_type != 'SR' and fu_type != 'LL' and fu_type != 'UL':
-        raise FilePrefixError("error in prefix of csv file - must be SR_, LL_ or UL_", None)
+        raise FilePrefixError("error in name of csv file - must be TVC-SR-xx.csv, TVC-LL-xx.csv or TVC-UL-xx.csv", None)
         
     return fu_type
         

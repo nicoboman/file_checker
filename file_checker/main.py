@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from pathlib import Path
 from utils.common import *
 from checks.checkInit import *
@@ -13,13 +12,14 @@ from error.datdutErrors import *
 
 p_datdut_dir = Path(C_DAT_DUT_DIR)
 
+# for each dut file in the directory
 for dat_dut_file in p_datdut_dir.glob('*.csv'):
     displayFileName(dat_dut_file.name)
     b_id_error_flag = False
+    line_number = 0
         
+    # opens and checks one file:
     with open (C_DAT_DUT_DIR + dat_dut_file.name,'r',encoding='utf8') as file_handler:
-        line_number = 0
-        
         # read and check each line of the file
         while True:
             line = file_handler.readline()
