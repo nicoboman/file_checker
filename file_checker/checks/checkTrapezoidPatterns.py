@@ -4,7 +4,7 @@ import numpy as np
 from utils.common import *
 from error.datdutErrors import *
 
-class CheckTrapezoidPatterns():
+class CheckTrapezoidPatterns(object):
     "check trapezoid patterns of dut file"
     
     def __init__(self, obj_init):
@@ -63,7 +63,9 @@ class CheckTrapezoidPatterns():
                     self.error_string = self.error_string + self.error_list.pop(0) + '\n'
                 except IndexError:
                     break
-            
+            # remove last line jump
+            self.error_string = self.error_string[:-1]
+
             raise TrapezoidPatternsError(self.error_string)
 
     def checkSlope(self):

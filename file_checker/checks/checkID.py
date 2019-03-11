@@ -40,7 +40,9 @@ class CheckID(object):
                     self.error_string = self.error_string + self.error_list.pop(0) + '\n'
                 except IndexError:
                     break
-            
+            # remove last line jump
+            self.error_string = self.error_string[:-1]
+
             raise IDsError(self.error_string)
         
     def isUniqueIDs(self, tab):

@@ -2,7 +2,7 @@
 from utils.common import *
 from error.datdutErrors import *
 
-class CheckInit:
+class CheckInit(object):
     "process init checks of dut file"
     
     def __init__(self, liste, line_number, fu_type):
@@ -34,7 +34,9 @@ class CheckInit:
                     self.error_string = self.error_string + self.error_list.pop(0) + '\n'
                 except IndexError:
                     break
-                    
+            # remove last line jump
+            self.error_string = self.error_string[:-1]
+            
             raise InitialChecksError(self.error_string, self.line_number)
     
     def getType(self):

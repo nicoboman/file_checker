@@ -4,7 +4,7 @@ import numpy as np
 from utils.common import *
 from error.datdutErrors import *
 
-class CheckSquarePatterns():
+class CheckSquarePatterns(object):
     "check square patterns of dut file"
     
     def __init__(self, obj_init):
@@ -59,6 +59,8 @@ class CheckSquarePatterns():
                     self.error_string = self.error_string + self.error_list.pop(0) + '\n'
                 except IndexError:
                     break
+            # remove last line jump
+            self.error_string = self.error_string[:-1]
             
             raise SquarePatternsError(self.error_string)
 

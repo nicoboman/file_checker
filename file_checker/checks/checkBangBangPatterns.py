@@ -4,7 +4,7 @@ import numpy as np
 from utils.common import *
 from error.datdutErrors import *
 
-class CheckBangBangPatterns():
+class CheckBangBangPatterns(object):
     "check bangbang patterns of dut file"
     
     def __init__(self, obj_init):
@@ -57,6 +57,8 @@ class CheckBangBangPatterns():
                     self.error_string = self.error_string + self.error_list.pop(0) + '\n'
                 except IndexError:
                     break
+            # remove last line jump
+            self.error_string = self.error_string[:-1]
             
             raise BangBangPatternsError(self.error_string)
     

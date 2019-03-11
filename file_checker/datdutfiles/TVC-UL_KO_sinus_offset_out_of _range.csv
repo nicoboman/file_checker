@@ -2,7 +2,7 @@ definition,type,id,delay_or_step_duration,axis,offset,is_600Hz_cmd,ampl_or_stepi
 #######################
 ## Pattern definition #
 #######################
-PATTERN,SINUS,0,15.2,,0.052,TRUE,0.052,1500,5,,,
+PATTERN,SINUS,0,15.2,,10000,TRUE,0.052,1500,5,,,
 PATTERN,SINUS,1,0,,0,TRUE,0.010,1000,6,,,
 ##############################################
 PATTERN,SQUARE,0,1.3,,0.01,FALSE,0.022,12,,,,
