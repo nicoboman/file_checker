@@ -17,8 +17,6 @@ dir_to_check = C_DAT_DUT_DIR + directory + '\\'
 
 p_datdut_dir = Path(C_DAT_DUT_DIR + directory)
 
-# test
-
 # for each dut file in the directory
 for dat_dut_file in p_datdut_dir.glob('*.csv'):
     displayFileName(dat_dut_file.name)
