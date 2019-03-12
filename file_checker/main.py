@@ -11,7 +11,11 @@ from checks.checkID import *
 from checks.checkFdir import *
 from error.datdutErrors import *
 
-p_datdut_dir = Path(C_DAT_DUT_DIR)
+print('Name of directory to check:')
+directory = input()
+dir_to_check = C_DAT_DUT_DIR + directory + '\\'
+
+p_datdut_dir = Path(C_DAT_DUT_DIR + directory)
 
 # for each dut file in the directory
 for dat_dut_file in p_datdut_dir.glob('*.csv'):
@@ -20,7 +24,7 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
     line_number = 0
         
     # opens and checks one file:
-    with open (C_DAT_DUT_DIR + dat_dut_file.name,'r',encoding='utf8') as file_handler:
+    with open (dir_to_check + dat_dut_file.name,'r',encoding='utf8') as file_handler:
         # read and check each line of the file
         while True:
             line = file_handler.readline()
@@ -101,7 +105,7 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
         # if no error during checks of ids:
         if not b_id_error_flag:
             try:
-                id_checker = CheckID(C_DAT_DUT_DIR + dat_dut_file.name)
+                id_checker = CheckID(dir_to_check + dat_dut_file.name)
                 id_checker.checkIDs()
             except IDsError as e:
                 print(e.args[0])
