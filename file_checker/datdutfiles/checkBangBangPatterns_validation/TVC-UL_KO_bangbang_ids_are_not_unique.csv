@@ -1,0 +1,31 @@
+definition,type,id,delay_or_step_duration,axis,offset,is_600Hz_cmd,ampl_or_stepinc_or_finalpos1,nb_item_or_first_patt_num,nb_repet_or_last_patt_num,finalpos2_or_fdir,slope_or_fdir,interval_duration_or_fdir
+#######################
+## Pattern definition #
+#######################
+PATTERN,SINUS,0,15.2,,0.052,TRUE,0.052,1500,5,,,
+PATTERN,SINUS,1,0,,0,TRUE,0.010,1000,6,,,
+##############################################
+PATTERN,SQUARE,0,1.3,,0.01,FALSE,0.022,12,,,,
+PATTERN,SQUARE,1,1.0,,-0.02,FALSE,0.013,8,,,,
+PATTERN,SQUARE,2,1.0,,0.003,FALSE,-0.03,4,,,,
+PATTERN,SQUARE,3,1.0,,0,FALSE,0.012,28,,,,
+##############################################
+PATTERN,TRAPEZOID,0,1.0,,0.012,FALSE,0.015,,,0.0015,5,5
+PATTERN,TRAPEZOID,1,10,,-0.013,FALSE,0.012,,,-0.0512,10,98
+##############################################
+PATTERN,BANGBANG,2,0,,0.012,FALSE,0.035,,,,7,
+PATTERN,BANGBANG,2,5,,-0.012,FALSE,0.012,,,,1,
+
+####################
+## Bloc definition #
+####################
+BLOC,SINUS,1,0,U,,,,0,1,,,
+BLOC,SQUARE,2,1.2,V,,,,0,1,,,
+BLOC,TRAPEZOID,3,1.5,V,,,,0,1,,,
+BLOC,BANGBANG,4,1.5,-U+V,,,,0,1,,,
+
+####################
+## Fdir definition #
+####################
+FDIR,CORRIDOR,,,U,,,,,,4,2,1
+FDIR,BEHAVIOUR,,,,,,,,,4,2,1
