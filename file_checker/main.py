@@ -110,5 +110,5 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
             except IDsError as e:
                 print(e.args[0])
 
-# print("\nStrike any key to quit...")
-# input()
+print("\nStrike any key to quit...")
+input()
