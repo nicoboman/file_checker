@@ -21,22 +21,18 @@ p_datdut_dir = Path(C_DAT_DUT_DIR + directory)
 for dat_dut_file in p_datdut_dir.glob('*.csv'):
     displayFileName(dat_dut_file.name)
     b_id_error_flag = False
-    line_number = 0
         
     # opens and checks one file:
     with open (dir_to_check + dat_dut_file.name,'r',encoding='utf8') as file_handler:
         # read and check each line of the file
-        while True:
-            line = file_handler.readline()
-            line_number = line_number + 1
-            
+        for line_number, line in enumerate(file_handler):
             # end of file
             if not line:
                 break
-            
             # do nothing for commentary, blank lines, and first line:
-            if line.startswith(C_COMMENT) or len(line.strip()) == 0 or line_number == 1: 
+            elif line.startswith(C_COMMENT) or len(line.strip()) == 0 or line_number == 0: 
                 continue
+            # check the line
             else:
                 line = line.replace('\n','')
                 liste = line.split(C_SEPARATOR)
