@@ -25,12 +25,12 @@ for dat_dut_file in p_datdut_dir.glob('*.csv'):
     # opens and checks one file:
     with open (dir_to_check + dat_dut_file.name,'r',encoding='utf8') as file_handler:
         # read and check each line of the file
-        for line_number, line in enumerate(file_handler):
+        for line_number, line in enumerate(file_handler, 1):
             # end of file
             if not line:
                 break
             # do nothing for commentary, blank lines, and first line:
-            elif line.startswith(C_COMMENT) or len(line.strip()) == 0 or line_number == 0: 
+            elif line.startswith(C_COMMENT) or len(line.strip()) == 0 or line_number == 1: 
                 continue
             # check the line
             else:
