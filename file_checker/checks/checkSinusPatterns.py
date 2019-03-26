@@ -27,7 +27,7 @@ class CheckSinusPatterns(object):
         self.setSinusPatternThreshold()
         
         # get min, max values
-        self.delay_min = (self.df_threshold[self.df_threshold.parameter == 'delay']).iloc[0,1]
+        self._delay_min = (self.df_threshold[self.df_threshold.parameter == 'delay']).iloc[0,1]
         self.delay_max = (self.df_threshold[self.df_threshold.parameter == 'delay']).iloc[0,2]
         self.offset_min = (self.df_threshold[self.df_threshold.parameter == 'offset']).iloc[0,1]
         self.offset_max = (self.df_threshold[self.df_threshold.parameter == 'offset']).iloc[0,2]
@@ -122,7 +122,7 @@ class CheckSinusPatterns(object):
             self.error_list.append('line ' + str(self.line_number) + ' number of repet is not a positive integer')
                        
     def checkDelay(self):
-        if float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) < self.delay_min:
+        if float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) < self._delay_min:
             self.error_list.append('line ' + str(self.line_number) + ' delay < min')
         elif float(self.liste[C_DELAY_OR_STEP_DURATION_COLUMN]) > self.delay_max:
             self.error_list.append('line ' + str(self.line_number) + ' delay > max')
